@@ -79,3 +79,26 @@
 #    - Removes compile-time errors but can cause runtime crashes if used blindly.
 ############################################################
 */
+
+
+
+/* 
+-------------------------------------------------------------------
+📝 Explanation of Tailwind Classes:
+
+1️⃣ text-muted-foreground  
+   • Comes from the shadcn/ui theme or custom Tailwind config.  
+   • Applies a softer (grayish) text color used for secondary text, 
+     like descriptions or subtle info.  
+   • Example: normal text = black, muted text = gray (#6b7280).  
+
+2️⃣ text-balance  
+   • A built-in Tailwind utility that uses `text-wrap: balance;`.  
+   • Balances multi-line text so that line breaks look visually even.  
+   • Helpful for headlines or centered paragraphs.
+
+✅ Combined Effect: 
+   The text will appear in a softer color and wrap neatly 
+   with balanced line lengths.
+-------------------------------------------------------------------
+*/
