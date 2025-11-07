@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { signInFormSchema } from "@/constant/sign-in-formSchema";
+import {FaGithub,FaGoogle} from "react-icons/fa"
 import {
   Form,
   FormControl,
@@ -18,8 +19,9 @@ import { Eye, EyeOff, OctagonAlertIcon } from "lucide-react";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { SocialProvider, type SocialLogin } from "@/types/sign-type";
+import { useRouter } from "next/navigation";
 
 export default function SignInView() {
   const router = useRouter();
@@ -42,6 +44,24 @@ export default function SignInView() {
         email: data.email,
         password: data.password,
       },
+      {
+        onSuccess: () => {
+          setPending(false);
+          router.push("/");
+        },
+        onError: ({ error }) => {
+          setPending(false);
+          setError(error.message);
+        },
+      }
+    );
+  };
+
+  const handleSocialSignIn = (data: SocialLogin) => {
+    setError(null);
+    setPending(true);
+    authClient.signIn.social(
+      { ...data, callbackURL: "/" },
       {
         onSuccess: () => {
           setPending(false);
@@ -139,16 +159,22 @@ export default function SignInView() {
                     type="button"
                     className="w-full"
                     disabled={pending}
+                    onClick={() =>
+                      handleSocialSignIn({ provider: SocialProvider.GOOGLE })
+                    }
                   >
-                    Google
+                    <FaGoogle/>
                   </Button>
                   <Button
                     variant={"outline"}
                     type="button"
                     className="w-full"
                     disabled={pending}
+                    onClick={() =>
+                      handleSocialSignIn({ provider: SocialProvider.GITHUB })
+                    }
                   >
-                    Github
+                    <FaGithub/>
                   </Button>
                 </div>
                 <div className="text-center text-sm">
@@ -171,7 +197,7 @@ export default function SignInView() {
               alt="Logo Image"
               className="h-[92px] w-[92px]"
             />
-            <p className="text-2xl font-semibold text-white">Meet.AI</p>
+            <p className="text-2xl font-semibold text-white">Trainer.AI</p>
           </div>
         </CardContent>
       </Card>

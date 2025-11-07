@@ -17,9 +17,11 @@ import { Eye, EyeOff, OctagonAlertIcon } from "lucide-react";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import {FaGithub,FaGoogle} from "react-icons/fa"
 import { signUpFormSchema } from "@/constant/sign-up-formSchema";
+import { SocialLogin, SocialProvider } from "@/types/sign-type";
+import { useRouter } from "next/navigation";
 
 export default function SignUpView() {
   const router = useRouter();
@@ -43,6 +45,7 @@ export default function SignUpView() {
         email: data.email,
         password: data.password,
         name: data.name,
+        callbackURL:"/"
       },
       {
         onSuccess: () => {
@@ -55,6 +58,21 @@ export default function SignUpView() {
         },
       }
     );
+  };
+
+  const handleSocialSignIn = (data: SocialLogin) => {
+    setError(null);
+    setPending(true);
+    authClient.signIn.social({...data,callbackURL:"/"}, {
+      onSuccess: () => {
+        setPending(false);
+        router.push("/");
+      },
+      onError: ({ error }) => {
+        setPending(false);
+        setError(error.message);
+      },
+    });
   };
 
   return (
@@ -155,16 +173,22 @@ export default function SignUpView() {
                     type="button"
                     className="w-full"
                     disabled={pending}
+                    onClick={() =>
+                      handleSocialSignIn({ provider: SocialProvider.GOOGLE })
+                    }
                   >
-                    Google
+                    <FaGoogle/>
                   </Button>
                   <Button
                     variant={"outline"}
                     type="button"
                     className="w-full"
                     disabled={pending}
+                    onClick={() =>
+                      handleSocialSignIn({ provider: SocialProvider.GITHUB })
+                    }
                   >
-                    Github
+                    <FaGithub/>
                   </Button>
                 </div>
                 <div className="text-center text-sm">
@@ -187,7 +211,7 @@ export default function SignUpView() {
               alt="Logo Image"
               className="h-[92px] w-[92px]"
             />
-            <p className="text-2xl font-semibold text-white">Meet.AI</p>
+            <p className="text-2xl font-semibold text-white">Trainer.AI</p>
           </div>
         </CardContent>
       </Card>

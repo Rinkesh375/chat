@@ -1,38 +1,16 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import HomeView from "@/modules/home/ui/views/home-view";
 
-export default function Home() {
-  const { data: session } = authClient.useSession();
-  const router = useRouter();
+export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
-  const handleSignUp = async () => {
-    try {
-      await authClient.signUp.email({
-        email: "rinkeshujjwal16@gmail.com",
-        password: "testing1234!@",
-        name: "Rinkesh",
-      });
-    } catch (error) {}
-  };
+  if (!session) {
+    redirect("/sign-in");
+  }
 
-  const handleSignOut = () => {
-    authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/sign-in");
-        },
-      },
-    });
-  };
-
-  return (
-    <div className="flex flex-col">
-      <Button onClick={handleSignUp}>Sign Up</Button>
-      {session?.user?.email && (
-        <Button onClick={handleSignOut}>Sign Out</Button>
-      )}
-    </div>
-  );
+  return <HomeView />;
 }
