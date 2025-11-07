@@ -1,9 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const { data: session } = authClient.useSession();
+  const router = useRouter();
 
   const handleSignUp = async () => {
     try {
@@ -15,16 +17,14 @@ export default function Home() {
     } catch (error) {}
   };
 
-  const handleSignOut = async () => {
-    try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            console.log("It should be redirect to guest page");
-          },
+  const handleSignOut = () => {
+    authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          router.push("/sign-in");
         },
-      });
-    } catch (error) {}
+      },
+    });
   };
 
   return (
