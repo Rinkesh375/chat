@@ -18,7 +18,7 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
-import {FaGithub,FaGoogle} from "react-icons/fa"
+import { FaGithub, FaGoogle } from "react-icons/fa";
 import { signUpFormSchema } from "@/constant/sign-up-formSchema";
 import { SocialLogin, SocialProvider } from "@/types/sign-type";
 import { useRouter } from "next/navigation";
@@ -45,7 +45,7 @@ export default function SignUpView() {
         email: data.email,
         password: data.password,
         name: data.name,
-        callbackURL:"/"
+        callbackURL: "/",
       },
       {
         onSuccess: () => {
@@ -63,16 +63,18 @@ export default function SignUpView() {
   const handleSocialSignIn = (data: SocialLogin) => {
     setError(null);
     setPending(true);
-    authClient.signIn.social({...data,callbackURL:"/"}, {
-      onSuccess: () => {
-        setPending(false);
-        router.push("/");
-      },
-      onError: ({ error }) => {
-        setPending(false);
-        setError(error.message);
-      },
-    });
+    authClient.signIn.social(
+      { ...data, callbackURL: "/" },
+      {
+        onSuccess: () => {
+          setPending(false);
+        },
+        onError: ({ error }) => {
+          setPending(false);
+          setError(error.message);
+        },
+      }
+    );
   };
 
   return (
@@ -177,7 +179,7 @@ export default function SignUpView() {
                       handleSocialSignIn({ provider: SocialProvider.GOOGLE })
                     }
                   >
-                    <FaGoogle/>
+                    <FaGoogle />
                   </Button>
                   <Button
                     variant={"outline"}
@@ -188,7 +190,7 @@ export default function SignUpView() {
                       handleSocialSignIn({ provider: SocialProvider.GITHUB })
                     }
                   >
-                    <FaGithub/>
+                    <FaGithub />
                   </Button>
                 </div>
                 <div className="text-center text-sm">

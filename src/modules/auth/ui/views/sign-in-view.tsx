@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { signInFormSchema } from "@/constant/sign-in-formSchema";
-import {FaGithub,FaGoogle} from "react-icons/fa"
+import { FaGithub, FaGoogle } from "react-icons/fa";
 import {
   Form,
   FormControl,
@@ -65,7 +65,6 @@ export default function SignInView() {
       {
         onSuccess: () => {
           setPending(false);
-          router.push("/");
         },
         onError: ({ error }) => {
           setPending(false);
@@ -163,7 +162,7 @@ export default function SignInView() {
                       handleSocialSignIn({ provider: SocialProvider.GOOGLE })
                     }
                   >
-                    <FaGoogle/>
+                    <FaGoogle />
                   </Button>
                   <Button
                     variant={"outline"}
@@ -174,7 +173,7 @@ export default function SignInView() {
                       handleSocialSignIn({ provider: SocialProvider.GITHUB })
                     }
                   >
-                    <FaGithub/>
+                    <FaGithub />
                   </Button>
                 </div>
                 <div className="text-center text-sm">
