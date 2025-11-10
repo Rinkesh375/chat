@@ -6,5 +6,5 @@ export default function AgentsView() {
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(trpc.agents.getMany.queryOptions());
 
-  return <div>agents-view</div>;
+  return <div></div>;
 }

@@ -148,3 +148,42 @@ export default async function Page() {
 
 
 */
+
+
+
+
+/*
+=============================================
+📘 GLOBAL STYLE NOTES — Tailwind @layer base
+=============================================
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+@layer base:
+• Tailwind CSS provides 3 main style layers — base, components, and utilities.
+• The 'base' layer is used for defining global styles that apply to HTML elements before utilities.
+
+This code defines a base-level rule for button-like elements.
+It ensures that any interactive (non-disabled) button or element with a 'role="button"' 
+shows the hand pointer cursor when hovered — providing a consistent user experience.
+
+----------------------------------------------------
+🎯 Selector Explanation:
+- Targets all <button> elements that are not disabled.
+- Also targets any element with role="button" that is not disabled.
+- The :not(:disabled) pseudo-class ensures that elements marked as disabled are excluded from this rule.
+
+----------------------------------------------------
+💡 Property Explanation:
+- 'cursor: pointer;' changes the mouse cursor to a hand icon 
+  when hovering over clickable elements.
+- This visually indicates interactivity for better UX.
+----------------------------------------------------
+*/
+
+

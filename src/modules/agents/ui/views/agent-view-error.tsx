@@ -1,7 +1,7 @@
-"use client";
+"use client"
 import ErrorState from "@/components/loading-error-state/error-stage";
 
-export default function ErrorPage() {
+export function AgentViewError() {
   return (
     <ErrorState
       title="Error loading agents"
