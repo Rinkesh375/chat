@@ -40,9 +40,6 @@
 ############################################################
 */
 
-
-
-
 /* 
 # ------------------------------------------------------------
 # Notes / Tips: Understanding the `!` in → process.env.DATABASE_URL!
@@ -80,8 +77,6 @@
 ############################################################
 */
 
-
-
 /* 
 -------------------------------------------------------------------
 📝 Explanation of Tailwind Classes:
@@ -101,4 +96,55 @@
    The text will appear in a softer color and wrap neatly 
    with balanced line lengths.
 -------------------------------------------------------------------
+*/
+
+
+
+
+
+
+
+
+/*
+
+ ------------------------------------------------------------
+   🧾 Example: Next.js + tRPC + React Query (Server Prefetch + Client Hydration)
+------------------------------------------------------------
+📌 Purpose:
+   - Prefetch agents data from backend using tRPC on the server.
+   - Dehydrate the cache so the client gets data instantly on load.
+   - Prevents extra API calls and improves performance.
+------------------------------------------------------------
+
+import AgentsView from "@/modules/agents/ui/views/agents-view"; // 👇 Client component that displays agents
+import { getQueryClient, trpc } from "@/trpc/server"; // 👇 tRPC + query client helpers for server-side fetching
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query"; // 👇 React Query hydration utilities
+
+export default async function Page() {
+  🧠 Create a new React Query client instance (server-side)
+     👇 This client temporarily stores prefetched data for React Query. 
+ 
+  const queryClient = getQueryClient();
+
+  🚀 Prefetch the tRPC query before rendering the page
+     - trpc.agents.getMany.queryOptions() gives the query key + function.
+     - prefetchQuery() runs the fetch and caches the data.
+     - 'void' means we’re not awaiting since this is a background process.
+  
+  void queryClient.prefetchQuery(trpc.agents.getMany.queryOptions());
+
+  💾 Return the HydrationBoundary wrapper
+     - dehydrate(queryClient) converts the cached data to JSON.
+     - The client (React) rehydrates it automatically using React Query.
+     - <AgentsView /> is wrapped so it instantly gets cached data.
+ 
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <AgentsView />  💡 Client component reading hydrated data }
+    </HydrationBoundary>
+  );
+}
+
+
+
 */
