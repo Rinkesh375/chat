@@ -1,5 +1,5 @@
 "use client"
-import ErrorState from "@/components/loading-error-state/error-stage";
+import ErrorState from "@/components/loading-error-state/error-state";
 
 export function AgentViewError() {
   return (
