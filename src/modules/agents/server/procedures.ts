@@ -15,16 +15,23 @@ import {
 export const agentsRouter = createTRPCRouter({
   getOne: protectedProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input: { id } }) => {
+    .query(async ({ input: { id }, ctx }) => {
       try {
-        const [result] = await db
+        const [existingAgent] = await db
           .select({
             ...getTableColumns(agents),
             meetingCount: sql<number>`5`,
           })
           .from(agents)
-          .where(eq(agents.id, id));
-        return result;
+          .where(and(eq(agents.id, id),  eq(agents.userId, ctx.auth.user.id)));
+
+        if (!existingAgent) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: `Agent not found by this id:${id}`,
+          });
+        }
+        return existingAgent;
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

@@ -6,8 +6,10 @@ import { columns } from "../components/columns";
 import EmptyState from "@/components/loading-error-state/empty-state";
 import useAgentsFilters from "../../hooks/use-agents-filters";
 import DataPagination from "../components/data-pagination";
+import { useRouter } from "next/navigation";
 
 export default function AgentsView() {
+  const router = useRouter();
   const [filters, setFilters] = useAgentsFilters();
   const trpc = useTRPC();
   const { data } = useSuspenseQuery(
@@ -16,7 +18,11 @@ export default function AgentsView() {
 
   return (
     <div className="flex-1 pb-4 md:px-8 flex flex-col space-y-4">
-      <DataTable data={data.items} columns={columns} />
+      <DataTable 
+      data={data.items} 
+      columns={columns} 
+      onRowClick={(row)=>router.push(`/agents/${row.id}`)}
+      />
       <DataPagination
         page={filters.page}
         totalPages={data.totalPages}
@@ -25,7 +31,7 @@ export default function AgentsView() {
       {!data?.items.length && (
         <EmptyState
           title="Create your first agent"
-          description="Create an agent to join your  meetings. Each agent will follow your instructions and can interact with participants during the call."
+          description="Create an agent to join your meetings. Each agent will follow your instructions and can interact with participants during the call."
         />
       )}
     </div>
