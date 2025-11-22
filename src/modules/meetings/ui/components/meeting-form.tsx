@@ -1,9 +1,9 @@
 import { useTRPC } from "@/trpc/client";
-import { AgentFormProps } from "@/types/new-agent-meeting";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
-import { agentsInsertSchema } from "../../schemas";
+import { meetingsInsertSchema } from "../../schemas";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import GeneratedAvatar from "@/components/generated-avatar";
@@ -20,45 +20,46 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { MeetingFormProps } from "@/types/new-agent-meeting";
 
-export default function AgentForm({
+export default function MeetingForm({
   onSuccess,
   onCancel,
   initialValues,
-}: AgentFormProps) {
+}: MeetingFormProps) {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const form = useForm<z.infer<typeof agentsInsertSchema>>({
-    resolver: zodResolver(agentsInsertSchema),
+  const form = useForm<z.infer<typeof meetingsInsertSchema>>({
+    resolver: zodResolver(meetingsInsertSchema),
     defaultValues: {
       name: initialValues?.name ?? "",
-      instructions: initialValues?.instructions ?? "",
+      agentId: initialValues?.agentId ?? "",
     },
   });
 
-  const createAgent = useMutation(
-    trpc.agents.create.mutationOptions({
+  const createMeeting = useMutation(
+    trpc.meetings.create.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.agents.getMany.queryOptions({})
+          trpc.meetings.getMany.queryOptions({})
         );
         onSuccess?.();
       },
       onError: (error) => {
-        toast.error(`Failed to create agent: ${error.message}`);
+        toast.error(`Failed to create meeting: ${error.message}`);
       },
     })
   );
 
-  const updateAgent = useMutation(
-    trpc.agents.update.mutationOptions({
+  const updateMeeting = useMutation(
+    trpc.meetings.update.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(
-          trpc.agents.getMany.queryOptions({})
+          trpc.meetings.getMany.queryOptions({})
         );
         if (initialValues?.id) {
           await queryClient.invalidateQueries(
-            trpc.agents.getOne.queryOptions({ id: initialValues.id })
+            trpc.meetings.getOne.queryOptions({ id: initialValues.id })
           );
         }
         onSuccess?.();
@@ -70,13 +71,13 @@ export default function AgentForm({
   );
 
   const isEdit = !!initialValues?.id;
-  const isPending = createAgent.isPending || updateAgent.isPending;
+  const isPending = createMeeting.isPending || updateMeeting.isPending;
 
-  const onSubmit = async (values: z.infer<typeof agentsInsertSchema>) => {
+  const onSubmit = async (values: z.infer<typeof meetingsInsertSchema>) => {
     if (isEdit) {
-      updateAgent.mutate({ ...values, id: initialValues.id });
+      updateMeeting.mutate({ ...values, id: initialValues.id });
     } else {
-      createAgent.mutate(values);
+      createMeeting.mutate(values);
     }
   };
 
@@ -101,22 +102,7 @@ export default function AgentForm({
             </FormItem>
           )}
         />
-        <FormField
-          name="instructions"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Instructions</FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder="you are a helpful coding assistant that can answer questions and help with code explaining."
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        
         <div className="flex justify-between gap-x-2">
           {onCancel && (
             <Button

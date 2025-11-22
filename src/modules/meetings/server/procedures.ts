@@ -1,77 +1,61 @@
 import { db } from "@/db";
-import { agents } from "@/db/schema";
+import { meetings } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { agentsInsertSchema, agentUpdaeSchema } from "../schemas";
 import { z } from "zod";
-import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike } from "drizzle-orm";
 import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
   MAX_PAGE_SIZE,
   MIN_PAGE_SIZE,
 } from "@/constant/constants";
+import { meetingsInsertSchema, meetingUpdateSchema } from "../schemas";
 
-export const agentsRouter = createTRPCRouter({
-  update: protectedProcedure
-    .input(agentUpdaeSchema)
+export const meetingsRouter = createTRPCRouter({
+ update: protectedProcedure
+    .input(meetingUpdateSchema)
     .mutation(async ({ ctx, input }) => {
-      const [updatedAgent] = await db
-        .update(agents)
+      const [updatedMeeting] = await db
+        .update(meetings)
         .set(input)
         .where(
-          and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id))
+          and(eq(meetings.id, input.id), eq(meetings.userId, ctx.auth.user.id))
         )
         .returning();
-      if (!updatedAgent) {
+      if (!updatedMeeting) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: `Failed to update agent by this id:${input.id}`,
+          message: `Failed to update meeting by this id:${input.id}`,
         });
       }
-      return updatedAgent;
+      return updatedMeeting;
     }),
 
-  remove: protectedProcedure
-    .input(z.object({ id: z.string() }))
-    .mutation(async ({ ctx, input }) => {
-      const [removeAgent] = await db
-        .delete(agents)
-        .where(
-          and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id))
-        )
-        .returning();
-      if (!removeAgent) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: `Failed to delete agent by this id:${input.id}`,
-        });
-      }
-      return removeAgent;
-    }),
   getOne: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input: { id }, ctx }) => {
       try {
-        const [existingAgent] = await db
+        const [existingMeeting] = await db
           .select({
-            ...getTableColumns(agents),
-            meetingCount: sql<number>`5`,
+            ...getTableColumns(meetings),
           })
-          .from(agents)
-          .where(and(eq(agents.id, id), eq(agents.userId, ctx.auth.user.id)));
+          .from(meetings)
+          .where(
+            and(eq(meetings.id, id), eq(meetings.userId, ctx.auth.user.id))
+          );
 
-        if (!existingAgent) {
+        if (!existingMeeting) {
           throw new TRPCError({
             code: "NOT_FOUND",
-            message: `Agent not found by this id:${id}`,
+            message: `Meeting not found by this id:${id}`,
           });
         }
-        return existingAgent;
+        return existingMeeting;
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: `Something went wrong while fetching agent by ${id}`,
+          message: `Something went wrong while fetching meeting by ${id}`,
         });
       }
     }),
@@ -92,29 +76,29 @@ export const agentsRouter = createTRPCRouter({
         const { page, pageSize, search } = input;
         const result = await db
           .select({
-            ...getTableColumns(agents),
-            meetingCount: sql<number>`5`,
+            ...getTableColumns(meetings),
           })
-          .from(agents)
+          .from(meetings)
           .where(
             and(
-              eq(agents.userId, ctx.auth.user.id),
-              search ? ilike(agents.name, `%${search}%`) : undefined
+              eq(meetings.userId, ctx.auth.user.id),
+              search ? ilike(meetings.name, `%${search}%`) : undefined
             )
           )
-          .orderBy(desc(agents.createdAt), desc(agents.id))
+          .orderBy(desc(meetings.createdAt), desc(meetings.id))
           .limit(pageSize)
           .offset((page - 1) * pageSize);
         const countResult = await db
           .select({ count: count() })
-          .from(agents)
+          .from(meetings)
           .where(
             and(
-              eq(agents.userId, ctx.auth.user.id),
-              search ? ilike(agents.name, `%${search}%`) : undefined
+              eq(meetings.userId, ctx.auth.user.id),
+              search ? ilike(meetings.name, `%${search}%`) : undefined
             )
           );
         const totalPages = Math.ceil(countResult[0]?.count / pageSize);
+
         return {
           items: result,
           total: countResult[0]?.count,
@@ -123,27 +107,28 @@ export const agentsRouter = createTRPCRouter({
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Something went wrong while fetching agents",
+          message: "Something went wrong while fetching meetings",
         });
       }
     }),
+
   create: protectedProcedure
-    .input(agentsInsertSchema)
+    .input(meetingsInsertSchema)
     .mutation(async ({ input, ctx }) => {
       try {
-        const [createdAgent] = await db
-          .insert(agents)
+        const [createdMeeting] = await db
+          .insert(meetings)
           .values({
             ...input,
             userId: ctx.auth.user.id,
           })
           .returning();
 
-        return createdAgent;
+        return createdMeeting;
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Something went wrong while creating a new agent",
+          message: "Something went wrong while creating a new meeting",
         });
       }
     }),

@@ -1,21 +1,24 @@
+"use client";
 import ResponsiveDialog from "@/components/responsive-dialog";
-import { NewAgentDialogProps } from "@/types/new-agent-meeting";
+import type { UpdateAgentDialogProps } from "@/types/new-agent-meeting";
 import AgentForm from "./agent-form";
 
-export default function NewAgentDialog({
+export default function UpdateAgentDialog({
   open,
   onOpenChange,
-}: NewAgentDialogProps) {
+  initialValues,
+}: UpdateAgentDialogProps) {
   return (
     <ResponsiveDialog
-      title="New Agent"
-      description="Create a New agent"
+      title="Edit Agent"
+      description="Edit the agent details"
       open={open}
       onOpenChange={onOpenChange}
     >
       <AgentForm
         onSuccess={() => onOpenChange(false)}
         onCancel={() => onOpenChange(false)}
+        initialValues={initialValues}
       />
     </ResponsiveDialog>
   );

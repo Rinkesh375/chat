@@ -1,3 +1,4 @@
+"use client";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -6,9 +7,19 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { AgentIdViewHeaderProps } from "@/types/agentId-page-type";
-import { ChevronRightIcon, MoreVerticalIcon, PencilIcon } from "lucide-react";
+import {
+  ChevronRightIcon,
+  MoreVerticalIcon,
+  PencilIcon,
+  TrashIcon,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function AgentIdViewHeader({
@@ -39,16 +50,21 @@ export default function AgentIdViewHeader({
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-      <DropdownMenu modal={true}>
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-            <Button variant={"ghost"}>
-                 <MoreVerticalIcon/>
-            </Button>
+          <Button variant={"ghost"}>
+            <MoreVerticalIcon />
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>
-                <PencilIcon/>
-            </DropdownMenuItem>
+          <DropdownMenuItem onClick={onEdit} className="cursor-pointer">
+            <PencilIcon className="size-4 text-black" />
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={onRemove} className="cursor-pointer">
+            <TrashIcon className="size-4 text-black" />
+            Delete
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
