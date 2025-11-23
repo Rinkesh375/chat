@@ -21,7 +21,7 @@ export interface UpdateMeetingDialogProps extends NewAgentDialogProps {
 }
 
 export interface MeetingFormProps {
-  onSuccess?: () => void;
+  onSuccess?: (id?: string) => void;
   onCancel?: () => void;
   initialValues?: MeetingGetOne;
 }

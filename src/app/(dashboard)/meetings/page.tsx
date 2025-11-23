@@ -1,5 +1,5 @@
-import { default as MeetingIdViewError } from "@/components/loading-error-state/error-state";
-import { default as MeetingIdViewLoading } from "@/components/loading-error-state/loading-state";
+import { default as MeetingViewError } from "@/components/loading-error-state/error-state";
+import { default as MeetingViewLoading } from "@/components/loading-error-state/loading-state";
 import { auth } from "@/lib/auth";
 import MeetingListHeader from "@/modules/meetings/ui/components/meetings-list-header";
 import MeetingsView from "@/modules/meetings/ui/views/meetings-view";
@@ -9,8 +9,15 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { loadSearchParams } from "@/modules/meetings/params";
+import type { SearchParams } from "nuqs/server";
 
-export default async function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const filters = await loadSearchParams(searchParams);
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -20,7 +27,9 @@ export default async function Page() {
   }
 
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(trpc.meetings.getMany.queryOptions({}));
+  void queryClient.prefetchQuery(
+    trpc.meetings.getMany.queryOptions({ ...filters })
+  );
 
   return (
     <>
@@ -28,7 +37,7 @@ export default async function Page() {
       <HydrationBoundary state={dehydrate(queryClient)}>
         <Suspense
           fallback={
-            <MeetingIdViewLoading
+            <MeetingViewLoading
               title="Loading meeting"
               description="This may take a few seconds"
             />
@@ -36,7 +45,7 @@ export default async function Page() {
         >
           <ErrorBoundary
             fallback={
-              <MeetingIdViewError
+              <MeetingViewError
                 title="Error while fetching meeting"
                 description="Something went wrong. Please try again later."
               />

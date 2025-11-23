@@ -1,7 +1,5 @@
 import { useTRPC } from "@/trpc/client";
-
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { meetingsInsertSchema } from "../../schemas";
 import { z } from "zod";
@@ -11,16 +9,20 @@ import { GeneratedAvatarVariant } from "@/types/generated-avatar";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { MeetingFormProps } from "@/types/new-agent-meeting";
+import type { MeetingFormProps } from "@/types/new-agent-meeting";
+import { useState } from "react";
+import { MAX_PAGE_SIZE } from "@/constant/constants";
+import CommandSelect from "@/components/command-select";
+import NewAgentDialog from "@/modules/agents/ui/components/new-agent-dialog";
 
 export default function MeetingForm({
   onSuccess,
@@ -28,6 +30,16 @@ export default function MeetingForm({
   initialValues,
 }: MeetingFormProps) {
   const trpc = useTRPC();
+  const [agentSearch, setAgentSearch] = useState<string>("");
+  const [openNewAgentDialog, setOpenNewAgentDialog] = useState<boolean>(false);
+
+  const agents = useQuery(
+    trpc.agents.getMany.queryOptions({
+      pageSize: MAX_PAGE_SIZE,
+      search: agentSearch,
+    })
+  );
+
   const queryClient = useQueryClient();
   const form = useForm<z.infer<typeof meetingsInsertSchema>>({
     resolver: zodResolver(meetingsInsertSchema),
@@ -39,11 +51,11 @@ export default function MeetingForm({
 
   const createMeeting = useMutation(
     trpc.meetings.create.mutationOptions({
-      onSuccess: async () => {
+      onSuccess: async (data) => {
         await queryClient.invalidateQueries(
           trpc.meetings.getMany.queryOptions({})
         );
-        onSuccess?.();
+        onSuccess?.(data.id);
       },
       onError: (error) => {
         toast.error(`Failed to create meeting: ${error.message}`);
@@ -82,43 +94,92 @@ export default function MeetingForm({
   };
 
   return (
-    <Form {...form}>
-      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-        <GeneratedAvatar
-          seed={form.watch("name")}
-          variant={GeneratedAvatarVariant.BotttsNeutral}
-          className="border size-16"
-        />
-        <FormField
-          name="name"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Example Code Explainer" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <div className="flex justify-between gap-x-2">
-          {onCancel && (
-            <Button
-              variant={"ghost"}
-              disabled={isPending}
-              type="button"
-              onClick={onCancel}
-            >
-              Cancel
+    <>
+      <NewAgentDialog
+        open={openNewAgentDialog}
+        onOpenChange={setOpenNewAgentDialog}
+      />
+      <Form {...form}>
+        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+          <GeneratedAvatar
+            seed={form.watch("name")}
+            variant={GeneratedAvatarVariant.BotttsNeutral}
+            className="border size-16"
+          />
+          <FormField
+            name="name"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="Example English Tutor" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            name="agentId"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Agent</FormLabel>
+                <FormControl>
+                  <CommandSelect
+                    options={(agents?.data?.items ?? []).map((agent) => ({
+                      id: agent.id,
+                      value: agent.id,
+                      children: (
+                        <div className="flex items-center gap-x-2">
+                          <GeneratedAvatar
+                            seed={agent.name}
+                            variant={GeneratedAvatarVariant.BotttsNeutral}
+                            className="border size-6"
+                          />
+                          <span>{agent.name}</span>
+                        </div>
+                      ),
+                    }))}
+                    onSelect={field.onChange}
+                    onSearch={setAgentSearch}
+                    value={field.value}
+                    placeholder="Select and agent"
+                  />
+                </FormControl>
+                <FormDescription>
+                  If you don{"'"}t find what you are looking for?{" "}
+                  <button
+                    type="button"
+                    className="text-primary hover:underline"
+                    onClick={() => setOpenNewAgentDialog(true)}
+                  >
+                    Create new agent
+                  </button>
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-between gap-x-2">
+            {onCancel && (
+              <Button
+                variant={"ghost"}
+                disabled={isPending}
+                type="button"
+                onClick={onCancel}
+              >
+                Cancel
+              </Button>
+            )}
+            <Button disabled={isPending} type="submit">
+              {isEdit ? "Update" : "Create"}
             </Button>
-          )}
-          <Button disabled={isPending} type="submit">
-            {isEdit ? "Update" : "Create"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+          </div>
+        </form>
+      </Form>
+    </>
   );
 }

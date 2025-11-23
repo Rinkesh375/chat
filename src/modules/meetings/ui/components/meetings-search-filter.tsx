@@ -1,9 +1,10 @@
 import { Input } from "@/components/ui/input";
 import { SearchIcon } from "lucide-react";
-import useAgentsFilters from "../../hooks/use-agents-filters";
+import useMeetingsFilters from "../../hooks/use-meetings-filters";
 
-export default function AgentSearchFilter() {
-  const [filters, setFilters] = useAgentsFilters();
+
+export default function MeetingSearchFilter() {
+  const [filters, setFilters] = useMeetingsFilters();
   return (
     <div className="relative">
       <Input
