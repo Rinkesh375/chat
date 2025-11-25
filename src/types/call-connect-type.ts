@@ -15,3 +15,8 @@ export enum Show {
 export interface CallLobbyProps {
   onJoin: () => void;
 }
+
+export interface CallActiveProps {
+  onLeave: () => void;
+  meetingName: string;
+}
