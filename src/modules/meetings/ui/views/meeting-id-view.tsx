@@ -11,6 +11,11 @@ import { toast } from "sonner";
 import useconfirm from "../../hooks/use-confirm";
 import UpdateMeetingDialog from "../components/update-meeting-dialog";
 import { useState } from "react";
+import { MeetingStatus } from "../../types";
+import UpcomingState from "../components/upcoming-state";
+import ActiveState from "../components/active-state";
+import CancelledState from "../components/cancelled-state";
+import ProcessingState from "../components/processing-state";
 
 export default function MeetingIdView({ meetingId }: { meetingId: string }) {
   const trpc = useTRPC();
@@ -45,6 +50,12 @@ export default function MeetingIdView({ meetingId }: { meetingId: string }) {
     }
   };
 
+  const isActive = data.status === MeetingStatus.Active;
+  const isUpcoming = data.status === MeetingStatus.Upcoming;
+  const isCancelled = data.status === MeetingStatus.Cancelled;
+  const isCompleted = data.status === MeetingStatus.Completed;
+  const isProcessing = data.status === MeetingStatus.Processing;
+
   return (
     <>
       <RemoveConfirmation />
@@ -58,10 +69,20 @@ export default function MeetingIdView({ meetingId }: { meetingId: string }) {
           meetingId={meetingId}
           meetingName={data.name}
           onEdit={() => {
-            setUpdateMeetingDialogOpen(true)
+            setUpdateMeetingDialogOpen(true);
           }}
           onRemove={handleRemoveMeeting}
         />
+        {isCancelled && <CancelledState />}
+        {isProcessing && <ProcessingState/>}
+        {isUpcoming && (
+          <UpcomingState
+            meetingId={meetingId}
+            onCancelMeeting={() => {}}
+            isCancelling={false}
+          />
+        )}
+        {isActive && <ActiveState meetingId={meetingId} />}
       </div>
     </>
   );
